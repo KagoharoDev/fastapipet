@@ -1,0 +1,73 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List, Literal
+
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True)
+
+    # App Settings
+    APP_NAME: str = "fastapipet"
+    APP_URL: str = "http://localhost:8000"
+    PROJECT_VERSION: str = "1.0.0"
+    DEBUG: bool = False
+    ALLOWED_ORIGINS: str = "*"  # Comma-separated string or "*"
+    ALLOWED_HOSTS: str = "*"   # Comma-separated hostnames or "*" to allow all
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = False
+
+    DATABASE_URL: str
+    CACHE_TYPE: Literal["inmemory", "redis", "database"] = "inmemory"
+    REDIS_URL: str | None = None
+    SECRET_KEY: str = ""  # Required; validate below
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Environment & Token Settings
+    ENVIRONMENT: str = "development"  # development, test, staging, production
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+
+    # File Upload Settings
+    UPLOAD_DIR: str = "uploads"
+
+    EMAIL_HOST: str
+    EMAIL_PORT: int
+    EMAIL_USERNAME: str
+    EMAIL_PASSWORD: str
+    EMAIL_FROM: str
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    TEMPLATE_FOLDER: str = str(BASE_DIR / "templates" / "emails")
+    SUPPRESS_SEND: int = 0
+
+    # Parse ALLOWED_ORIGINS
+    @property
+    def allowed_origins_list(self) -> List[str]:
+        if self.ALLOWED_ORIGINS == "*":
+            return ["*"]
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def allowed_hosts_list(self) -> List[str]:
+        if self.ALLOWED_HOSTS == "*":
+            return ["*"]
+        return [h.strip() for h in self.ALLOWED_HOSTS.split(",") if h.strip()]
+
+    @property
+    def secret_key_valid(self) -> bool:
+        return bool(
+            self.SECRET_KEY and self.SECRET_KEY != "your-secret-key"
+        )  # Basic check; customize if needed
+
+
+settings = Settings()
+
+# Validate SECRET_KEY on import (will raise ValidationError if invalid)
+if not settings.secret_key_valid:
+    raise ValueError(
+        "SECRET_KEY must be set in .env (run python generate_secret.py to generate one)."
+    )
