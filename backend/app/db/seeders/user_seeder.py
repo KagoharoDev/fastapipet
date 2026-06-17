@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from sqlalchemy import select
 
-from backend.app.db.seeders.base import BaseSeeder
-from backend.app.db.models.user import User
-from backend.app.core.security import get_password_hash
+from app.db.seeders.base import BaseSeeder
+from app.db.models.user import User
+from app.core.security import get_password_hash
 
 
 class UserSeeder(BaseSeeder):

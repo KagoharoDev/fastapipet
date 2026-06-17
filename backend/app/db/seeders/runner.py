@@ -5,9 +5,9 @@ from typing import Type, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.seeders.base import BaseSeeder
-from backend.app.core.config import settings
-from backend.app.utils.logging import get_logger
+from app.db.seeders.base import BaseSeeder
+from app.core.config import settings
+from app.utils.logging import get_logger
 
 logger = get_logger()
 
